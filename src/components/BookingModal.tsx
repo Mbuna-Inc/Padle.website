@@ -57,7 +57,7 @@ export const BookingModal = ({ isOpen, onClose, court }: BookingModalProps) => {
   if (!court) return null;
 
   return (
-    <Dialog open={isOpen} onClose={onClose}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-gray-900">
