@@ -58,18 +58,18 @@ export const BookingModal = ({ isOpen, onClose, court }: BookingModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-gray-900">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="pb-6">
+          <DialogTitle className="text-3xl font-bold text-gray-900">
             Book {court.name}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2">
             {/* Progress Steps */}
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-12 px-4">
               {[
                 { num: 1, label: "Date & Time", icon: Calendar },
                 { num: 2, label: "Equipment", icon: HandCoins },
@@ -77,21 +77,30 @@ export const BookingModal = ({ isOpen, onClose, court }: BookingModalProps) => {
                 { num: 4, label: "Confirm", icon: Clock }
               ].map((stepItem, index) => (
                 <div key={stepItem.num} className="flex items-center">
-                  <div className={`flex items-center justify-center w-10 h-10 rounded-full ${
-                    step >= stepItem.num 
-                      ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white' 
-                      : 'bg-gray-200 text-gray-600'
-                  }`}>
-                    <stepItem.icon className="w-5 h-5" />
+                  <div className="flex flex-col items-center">
+                    <div className={`flex items-center justify-center w-14 h-14 rounded-full transition-all duration-300 ${
+                      step >= stepItem.num 
+                        ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg scale-110' 
+                        : 'bg-gray-200 text-gray-600'
+                    }`}>
+                      <stepItem.icon className="w-7 h-7" />
+                    </div>
+                    <div className="mt-3 text-center">
+                      <div className={`text-sm font-medium ${
+                        step >= stepItem.num ? 'text-emerald-600' : 'text-gray-500'
+                      }`}>
+                        Step {stepItem.num}
+                      </div>
+                      <div className={`text-xs mt-1 ${
+                        step >= stepItem.num ? 'text-emerald-700' : 'text-gray-400'
+                      }`}>
+                        {stepItem.label}
+                      </div>
+                    </div>
                   </div>
-                  <span className={`ml-2 text-sm font-medium ${
-                    step >= stepItem.num ? 'text-emerald-600' : 'text-gray-500'
-                  }`}>
-                    {stepItem.label}
-                  </span>
                   {index < 3 && (
-                    <div className={`w-8 h-0.5 mx-4 ${
-                      step > stepItem.num ? 'bg-emerald-500' : 'bg-gray-200'
+                    <div className={`flex-1 h-1 mx-6 rounded-full transition-all duration-300 ${
+                      step > stepItem.num ? 'bg-gradient-to-r from-emerald-500 to-teal-500' : 'bg-gray-200'
                     }`} />
                   )}
                 </div>
@@ -99,133 +108,135 @@ export const BookingModal = ({ isOpen, onClose, court }: BookingModalProps) => {
             </div>
 
             {/* Step Content */}
-            {step === 1 && (
-              <BookingCalendar
-                selectedDate={selectedDate}
-                selectedTime={selectedTime}
-                duration={duration}
-                onDateChange={setSelectedDate}
-                onTimeChange={setSelectedTime}
-                onDurationChange={setDuration}
-              />
-            )}
+            <div className="px-2">
+              {step === 1 && (
+                <BookingCalendar
+                  selectedDate={selectedDate}
+                  selectedTime={selectedTime}
+                  duration={duration}
+                  onDateChange={setSelectedDate}
+                  onTimeChange={setSelectedTime}
+                  onDurationChange={setDuration}
+                />
+              )}
 
-            {step === 2 && (
-              <EquipmentRental
-                selectedEquipment={selectedEquipment}
-                onChange={setSelectedEquipment}
-              />
-            )}
+              {step === 2 && (
+                <EquipmentRental
+                  selectedEquipment={selectedEquipment}
+                  onChange={setSelectedEquipment}
+                />
+              )}
 
-            {step === 3 && (
-              <PaymentOptions
-                selectedMethod={paymentMethod}
-                onChange={setPaymentMethod}
-              />
-            )}
+              {step === 3 && (
+                <PaymentOptions
+                  selectedMethod={paymentMethod}
+                  onChange={setPaymentMethod}
+                />
+              )}
 
-            {step === 4 && (
-              <div className="space-y-6">
-                <h3 className="text-lg font-semibold">Booking Confirmation</h3>
-                
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Booking Details</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex justify-between">
-                      <span>Court:</span>
-                      <span className="font-medium">{court.name}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Date:</span>
-                      <span className="font-medium">{selectedDate?.toDateString()}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Time:</span>
-                      <span className="font-medium">{selectedTime}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Duration:</span>
-                      <span className="font-medium">{duration} hour{duration > 1 ? 's' : ''}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Payment Method:</span>
-                      <span className="font-medium">{paymentMethod}</span>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {selectedEquipment.length > 0 && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Equipment Rental</CardTitle>
+              {step === 4 && (
+                <div className="space-y-8">
+                  <h3 className="text-2xl font-semibold mb-6">Booking Confirmation</h3>
+                  
+                  <Card className="border-2">
+                    <CardHeader className="pb-4">
+                      <CardTitle className="text-xl">Booking Details</CardTitle>
                     </CardHeader>
-                    <CardContent>
-                      {selectedEquipment.map((item, index) => (
-                        <div key={index} className="flex justify-between py-1">
-                          <span>{item.name} x{item.quantity}</span>
-                          <span>${item.price * item.quantity}</span>
-                        </div>
-                      ))}
+                    <CardContent className="space-y-4">
+                      <div className="flex justify-between py-2">
+                        <span className="text-gray-600">Court:</span>
+                        <span className="font-medium">{court.name}</span>
+                      </div>
+                      <div className="flex justify-between py-2">
+                        <span className="text-gray-600">Date:</span>
+                        <span className="font-medium">{selectedDate?.toDateString()}</span>
+                      </div>
+                      <div className="flex justify-between py-2">
+                        <span className="text-gray-600">Time:</span>
+                        <span className="font-medium">{selectedTime}</span>
+                      </div>
+                      <div className="flex justify-between py-2">
+                        <span className="text-gray-600">Duration:</span>
+                        <span className="font-medium">{duration} hour{duration > 1 ? 's' : ''}</span>
+                      </div>
+                      <div className="flex justify-between py-2">
+                        <span className="text-gray-600">Payment Method:</span>
+                        <span className="font-medium">{paymentMethod}</span>
+                      </div>
                     </CardContent>
                   </Card>
-                )}
-              </div>
-            )}
+
+                  {selectedEquipment.length > 0 && (
+                    <Card className="border-2">
+                      <CardHeader className="pb-4">
+                        <CardTitle className="text-xl">Equipment Rental</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {selectedEquipment.map((item, index) => (
+                          <div key={index} className="flex justify-between py-2">
+                            <span>{item.name} x{item.quantity}</span>
+                            <span>MK{item.price * item.quantity}</span>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Booking Summary Sidebar */}
           <div className="lg:col-span-1">
-            <Card className="sticky top-4">
-              <CardHeader>
-                <CardTitle>Booking Summary</CardTitle>
+            <Card className="sticky top-4 border-2">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-xl">Booking Summary</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
+              <CardContent className="space-y-6">
+                <div className="space-y-3">
+                  <div className="flex justify-between text-base">
                     <span>Court ({duration}h)</span>
-                    <span>${courtPrice * duration}</span>
+                    <span>MK{courtPrice * duration}</span>
                   </div>
                   
                   {selectedEquipment.map((item, index) => (
-                    <div key={index} className="flex justify-between text-sm">
+                    <div key={index} className="flex justify-between text-base">
                       <span>{item.name} x{item.quantity}</span>
-                      <span>${item.price * item.quantity}</span>
+                      <span>MK{item.price * item.quantity}</span>
                     </div>
                   ))}
                   
-                  <Separator />
+                  <Separator className="my-4" />
                   
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-base">
                     <span>Subtotal</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span>MK{subtotal.toFixed(2)}</span>
                   </div>
                   
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-base">
                     <span>Tax (10%)</span>
-                    <span>${tax.toFixed(2)}</span>
+                    <span>MK{tax.toFixed(2)}</span>
                   </div>
                   
-                  <Separator />
+                  <Separator className="my-4" />
                   
-                  <div className="flex justify-between font-bold text-lg">
+                  <div className="flex justify-between font-bold text-xl">
                     <span>Total</span>
-                    <span>${total.toFixed(2)}</span>
+                    <span>MK{total.toFixed(2)}</span>
                   </div>
                 </div>
 
-                <div className="space-y-2 pt-4">
+                <div className="space-y-3 pt-6 border-t">
                   {selectedDate && (
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Calendar className="w-4 h-4" />
+                    <div className="flex items-center gap-3 text-base text-gray-600">
+                      <Calendar className="w-5 h-5" />
                       <span>{selectedDate.toDateString()}</span>
                     </div>
                   )}
                   
                   {selectedTime && (
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Clock className="w-4 h-4" />
+                    <div className="flex items-center gap-3 text-base text-gray-600">
+                      <Clock className="w-5 h-5" />
                       <span>{selectedTime} ({duration}h)</span>
                     </div>
                   )}
@@ -236,10 +247,11 @@ export const BookingModal = ({ isOpen, onClose, court }: BookingModalProps) => {
         </div>
 
         {/* Navigation Buttons */}
-        <div className="flex justify-between pt-6 border-t">
+        <div className="flex justify-between pt-8 border-t-2 mt-8">
           <Button
             variant="outline"
             onClick={step === 1 ? onClose : handlePrevious}
+            className="px-8 py-3 text-base"
           >
             {step === 1 ? 'Cancel' : 'Previous'}
           </Button>
@@ -250,7 +262,7 @@ export const BookingModal = ({ isOpen, onClose, court }: BookingModalProps) => {
               (step === 1 && (!selectedDate || !selectedTime)) ||
               (step === 3 && !paymentMethod)
             }
-            className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600"
+            className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 px-8 py-3 text-base"
           >
             {step === 4 ? 'Complete Booking' : 'Next'}
           </Button>
