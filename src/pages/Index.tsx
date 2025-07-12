@@ -37,9 +37,7 @@ const Index = () => {
       <Navigation onLogin={handleLogin} />
       
       <main className="pt-16">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <HeroSection onBookNow={handleBookNow} />
-        </div>
+        <HeroSection onBookNow={handleBookNow} />
       </main>
 
       <BookingModal 
