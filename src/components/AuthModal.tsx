@@ -1,5 +1,7 @@
 
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNotifications } from "@/contexts/NotificationContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,14 +10,27 @@ import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Facebook, Mail, Lock, User, Phone } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onBookNow?: () => void;
 }
 
-export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
+export const AuthModal = ({ isOpen, onClose, onBookNow }: AuthModalProps) => {
   const [isLogin, setIsLogin] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    fullName: "",
+    phone: ""
+  });
+  
+  const { login, register } = useAuth();
+  const { addNotification } = useNotifications();
+  const { toast } = useToast();
 
   const handleGoogleLogin = () => {
     console.log("Logging in with google");
@@ -27,16 +42,88 @@ export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
     // Handle Facebook OAuth
   };
 
-  const handleEmailLogin = (e: React.FormEvent) => {
+  const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Email login");
-    onClose();
+    setIsLoading(true);
+    
+    try {
+      const success = await login(formData.email, formData.password);
+      if (success) {
+        toast({
+          title: "Success!",
+          description: "You have been logged in successfully.",
+        });
+        onClose();
+        setFormData({ email: "", password: "", fullName: "", phone: "" });
+      } else {
+        toast({
+          title: "Error",
+          description: "Invalid email or password. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An error occurred during login. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleEmailRegister = (e: React.FormEvent) => {
+  const handleEmailRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Email registration");
-    onClose();
+    setIsLoading(true);
+    
+    try {
+      const success = await register({
+        email: formData.email,
+        password: formData.password,
+        fullName: formData.fullName,
+        phone: formData.phone
+      });
+      
+      if (success) {
+        // Add welcome notification
+        addNotification({
+          title: "Welcome to PlayEasy!",
+          message: "Your account has been created successfully. Start booking your first court!",
+          type: "success",
+          actionUrl: "/"
+        });
+
+        toast({
+          title: "Success!",
+          description: "Your account has been created successfully.",
+        });
+        
+        onClose();
+        setFormData({ email: "", password: "", fullName: "", phone: "" });
+        
+        // Redirect to booking after a short delay
+        setTimeout(() => {
+          if (onBookNow) {
+            onBookNow();
+          }
+        }, 1000);
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to create account. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An error occurred during registration. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -99,6 +186,8 @@ export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                       type="email"
                       placeholder="Enter your email"
                       className="pl-10"
+                      value={formData.email}
+                      onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                       required
                     />
                   </div>
@@ -113,13 +202,19 @@ export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                       type="password"
                       placeholder="Enter your password"
                       className="pl-10"
+                      value={formData.password}
+                      onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                       required
                     />
                   </div>
                 </div>
 
-                <Button type="submit" className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600">
-                  Sign In
+                <Button 
+                  type="submit" 
+                  disabled={isLoading}
+                  className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600"
+                >
+                  {isLoading ? "Signing In..." : "Sign In"}
                 </Button>
               </form>
             </TabsContent>
@@ -135,6 +230,8 @@ export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                       type="text"
                       placeholder="Enter your full name"
                       className="pl-10"
+                      value={formData.fullName}
+                      onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
                       required
                     />
                   </div>
@@ -149,6 +246,8 @@ export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                       type="tel"
                       placeholder="Enter your phone number"
                       className="pl-10"
+                      value={formData.phone}
+                      onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                       required
                     />
                   </div>
@@ -163,6 +262,8 @@ export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                       type="email"
                       placeholder="Enter your email"
                       className="pl-10"
+                      value={formData.email}
+                      onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                       required
                     />
                   </div>
@@ -177,13 +278,19 @@ export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                       type="password"
                       placeholder="Create a password"
                       className="pl-10"
+                      value={formData.password}
+                      onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                       required
                     />
                   </div>
                 </div>
 
-                <Button type="submit" className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600">
-                  Create Account
+                <Button 
+                  type="submit" 
+                  disabled={isLoading}
+                  className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600"
+                >
+                  {isLoading ? "Creating Account..." : "Create Account"}
                 </Button>
               </form>
             </TabsContent>

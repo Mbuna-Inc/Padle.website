@@ -37,42 +37,6 @@ const equipment: Equipment[] = [
     category: "Tennis",
     image: "/placeholder.svg",
     inStock: 25
-  },
-  {
-    id: 3,
-    name: "Badminton Racket",
-    price: 12,
-    description: "Lightweight carbon fiber racket",
-    category: "Badminton",
-    image: "/placeholder.svg",
-    inStock: 8
-  },
-  {
-    id: 4,
-    name: "Shuttlecock Set",
-    price: 8,
-    description: "Professional feather shuttlecocks",
-    category: "Badminton",
-    image: "/placeholder.svg",
-    inStock: 15
-  },
-  {
-    id: 5,
-    name: "Basketball",
-    price: 6,
-    description: "Official size and weight basketball",
-    category: "Basketball",
-    image: "/placeholder.svg",
-    inStock: 10
-  },
-  {
-    id: 6,
-    name: "Volleyball",
-    price: 6,
-    description: "Professional indoor volleyball",
-    category: "Volleyball",
-    image: "/placeholder.svg",
-    inStock: 8
   }
 ];
 

@@ -1,5 +1,8 @@
 
 import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useBookings } from "@/contexts/BookingContext";
+import { useNotifications } from "@/contexts/NotificationContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,11 +12,14 @@ import { Calendar, Clock, CreditCard, Smartphone, Building, HandCoins, Hash } fr
 import { BookingCalendar } from "@/components/BookingCalendar";
 import { EquipmentRental } from "@/components/EquipmentRental";
 import { PaymentOptions } from "@/components/PaymentOptions";
+import { useToast } from "@/hooks/use-toast";
+import { AuthGuard } from "@/components/AuthGuard";
 
 interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
   court: any;
+  onLogin: () => void;
 }
 
 // Generate unique booking ID
@@ -24,7 +30,7 @@ const generateBookingId = () => {
   return `${prefix}-${timestamp}-${random}`;
 };
 
-export const BookingModal = ({ isOpen, onClose, court }: BookingModalProps) => {
+export const BookingModal = ({ isOpen, onClose, court, onLogin }: BookingModalProps) => {
   const [step, setStep] = useState(1);
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState("");
@@ -32,6 +38,12 @@ export const BookingModal = ({ isOpen, onClose, court }: BookingModalProps) => {
   const [selectedEquipment, setSelectedEquipment] = useState<any[]>([]);
   const [paymentMethod, setPaymentMethod] = useState("");
   const [bookingId, setBookingId] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const { user, isAuthenticated } = useAuth();
+  const { addBooking } = useBookings();
+  const { addNotification } = useNotifications();
+  const { toast } = useToast();
 
   // Generate booking ID when modal opens
   useEffect(() => {
@@ -54,22 +66,70 @@ export const BookingModal = ({ isOpen, onClose, court }: BookingModalProps) => {
     if (step > 1) setStep(step - 1);
   };
 
-  const handleBooking = () => {
-    // Handle booking submission
-    console.log({
-      bookingId,
-      court,
-      date: selectedDate,
-      time: selectedTime,
-      duration,
-      equipment: selectedEquipment,
-      paymentMethod,
-      total
-    });
-    // Reset and close
-    setStep(1);
-    setBookingId("");
-    onClose();
+  const handleBooking = async () => {
+    if (!isAuthenticated) {
+      onClose();
+      onLogin();
+      return;
+    }
+
+    if (!selectedDate || !selectedTime || !paymentMethod) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      // Add booking to context
+      addBooking({
+        courtId: court.id,
+        courtName: court.name,
+        courtType: court.type,
+        date: selectedDate,
+        time: selectedTime,
+        duration,
+        totalAmount: total,
+        status: 'confirmed',
+        equipment: selectedEquipment,
+        paymentMethod
+      });
+
+      // Add notification
+      addNotification({
+        title: "Booking Confirmed!",
+        message: `Your booking for ${court.name} on ${selectedDate?.toLocaleDateString()} at ${selectedTime} has been confirmed.`,
+        type: "success",
+        actionUrl: "/profile"
+      });
+
+      toast({
+        title: "Booking Confirmed!",
+        description: `Your booking for ${court.name} has been confirmed.`,
+      });
+
+      // Reset and close
+      setStep(1);
+      setBookingId("");
+      setSelectedDate(undefined);
+      setSelectedTime("");
+      setDuration(1);
+      setSelectedEquipment([]);
+      setPaymentMethod("");
+      onClose();
+    } catch (error) {
+      toast({
+        title: "Booking Failed",
+        description: "There was an error processing your booking. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleClose = () => {
@@ -83,6 +143,7 @@ export const BookingModal = ({ isOpen, onClose, court }: BookingModalProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-[95vw] sm:max-w-4xl lg:max-w-6xl max-h-[95vh] overflow-y-auto p-3 sm:p-6">
+        <AuthGuard onLogin={onLogin} message="Please sign in to book a court.">
         <DialogHeader className="pb-4 sm:pb-6">
           <DialogTitle className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
             Book {court.name}
@@ -299,13 +360,15 @@ export const BookingModal = ({ isOpen, onClose, court }: BookingModalProps) => {
             onClick={step === 4 ? handleBooking : handleNext}
             disabled={
               (step === 1 && (!selectedDate || !selectedTime)) ||
-              (step === 3 && !paymentMethod)
+              (step === 3 && !paymentMethod) ||
+              isSubmitting
             }
             className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 px-4 sm:px-8 py-2 sm:py-3 text-sm sm:text-base order-1 sm:order-2"
           >
-            {step === 4 ? 'Complete Booking' : 'Next'}
+            {step === 4 ? (isSubmitting ? 'Processing...' : 'Complete Booking') : 'Next'}
           </Button>
         </div>
+        </AuthGuard>
       </DialogContent>
     </Dialog>
   );

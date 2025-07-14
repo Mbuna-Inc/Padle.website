@@ -37,15 +37,7 @@ export const HeroSection = ({ onBookNow }: HeroSectionProps) => {
               <Calendar className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
               Book Now
             </Button>
-            
-            <Button 
-              variant="outline" 
-              size="lg"
-              className="border-2 border-emerald-500 text-emerald-600 hover:bg-emerald-50 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold rounded-full transition-all duration-300 hover:scale-105"
-            >
-              <MapPin className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-              Find Courts
-            </Button>
+            {/* Removed Find Courts button */}
           </div>
 
           {/* Quick Stats */}

@@ -44,11 +44,13 @@ const Index = () => {
         isOpen={isBookingModalOpen}
         onClose={() => setIsBookingModalOpen(false)}
         court={court}
+        onLogin={() => setIsAuthModalOpen(true)}
       />
 
       <AuthModal 
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
+        onBookNow={handleBookNow}
       />
     </div>
   );
